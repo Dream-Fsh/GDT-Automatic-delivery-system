@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "广点通投放控制台",
+  "version": "0.1.0",
+  "description": "在已登录的浏览器页面中执行并审计广点通批量新建流程；提交审核前始终停下。",
+  "permissions": ["activeTab", "tabs", "debugger", "storage"],
+  "host_permissions": ["https://cl.mobgi.com/*", "https://oapi.dingtalk.com/*"],
+  "action": {
+    "default_title": "打开广点通投放控制台"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "app.html"
+}

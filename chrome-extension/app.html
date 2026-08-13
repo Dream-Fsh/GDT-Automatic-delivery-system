@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>广点通投放控制台</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">GDT · 浏览器自动化</p>
+          <h1>广点通投放控制台</h1>
+          <p class="intro">将本次投放参数固化为可复核任务，在已登录的创量页面逐项执行。任何异常都会暂停；最终提交始终由人工完成。</p>
+        </div>
+        <div class="safety"><span>安全边界</span><strong>预览后停止</strong></div>
+      </header>
+      <section class="notice"><b>开始前：</b>在同一 Chrome 浏览器中打开并登录创量的「批量新建」页面，然后保持该标签页为当前活动页。软件不会读取密码、Cookie 或浏览器历史。</section>
+      <form id="jobForm">
+        <section class="panel"><div class="section-title"><span>01</span><h2>投放对象</h2></div><div class="grid two">
+          <label>账户 ID（每行一个）<textarea id="accountIds" required placeholder="84535998"></textarea></label>
+          <label>账户名称 / 项目备注<input id="projectName" placeholder="例如：厦门云启创想科技有限公司"></label>
+          <label>产品完整名称（平台显示名称）<input id="productKeyword" required placeholder="例如：6.16-腾讯-fsh-阅读"></label>
+          <label>品牌形象搜索关键词<input id="brandKeyword" required placeholder="例如：云启"></label>
+          <label>定向模板<input id="targetingTemplate" required value="6.3-腾讯-通投-fsh"></label>
+          <label>账户数量（校验用）<input id="accountCount" type="number" min="1" placeholder="自动按账户 ID 计算"></label>
+          <label class="full">钉钉机器人 Webhook（可选）<input id="dingTalkWebhook" type="password" autocomplete="off" placeholder="粘贴钉钉机器人 webhook；仅保存在本地"></label>
+        </div></section>
+        <section class="panel"><div class="section-title"><span>02</span><h2>创意与资源</h2></div><div class="grid two">
+          <label>素材目录<input id="materialFolder" required value="广点通-通信素材"></label>
+          <div class="full material-conditions-field">
+            <span class="field-label">素材筛选条件</span>
+            <div id="materialConditionsEditor" class="material-conditions-editor" aria-label="素材筛选条件"></div>
+            <button id="addMaterialCondition" class="condition-add" type="button">＋ 添加条件</button>
+          </div>
+          <div class="date-range-field full" id="materialDateRangeField">
+            <span class="date-range-label">素材数据时间</span>
+            <button id="materialDateTrigger" class="date-range-trigger" type="button" aria-expanded="false" aria-controls="materialDatePicker">
+              <span class="calendar-icon" aria-hidden="true">▣</span><span id="materialDateText">请选择数据时间</span>
+            </button>
+            <input id="materialDateStart" type="hidden" required>
+            <input id="materialDateEnd" type="hidden" required>
+            <div id="materialDatePicker" class="date-range-picker" hidden>
+              <div class="date-picker-head"><b>数据时间</b><button id="materialDateClose" type="button" aria-label="关闭">×</button></div>
+              <div class="date-picker-shortcuts" aria-label="快捷日期">
+                <button type="button" data-days="0">今天</button><button type="button" data-days="0" data-offset="-1">昨天</button><button type="button" data-days="6">近7天</button><button type="button" data-days="6">本周</button><button type="button" data-days="29">近30天</button>
+              </div>
+              <div id="materialDateCalendars" class="date-picker-calendars"></div>
+              <div class="date-picker-actions"><button id="materialDateClear" type="button">清空</button><button id="materialDateApply" type="button">确定</button></div>
+            </div>
+          </div>
+          <label>文案一<input id="copyOne" required value="解锁福利,限时获取"></label>
+          <label>文案二<input id="copyTwo" required value="号码提交,解锁福利"></label>
+          <label class="full">账户与落地页映射（每行：账户ID | 落地页名称）<textarea id="landingPages" required placeholder="84535998 | 6.16-腾讯-fsh-阅读"></textarea></label>
+        </div></section>
+        <section class="panel"><div class="section-title"><span>03</span><h2>出价与命名</h2></div><div class="grid three">
+          <label>最低出价<input id="bidMin" type="number" value="110" min="1" required></label>
+          <label>最高出价<input id="bidMax" type="number" value="130" min="1" required></label>
+          <label>一键起量预算<input id="budget" type="number" value="200" min="1" required></label>
+        </div><p class="rule">固定规范：智能版位 · 稳步探索 · API 上报 · 表单预约 · 点击归因 · 长期投放 · 多文案测试（2 条）· 创意组素材上限 1。</p></section>
+        <section class="actions"><button class="secondary" id="saveDraft" type="button">保存草稿</button><button class="secondary" id="checkConfig" type="button">校验配置</button><button class="primary" id="runWorkflow" type="submit">连接当前页面并执行至预览</button><button class="danger" id="stopWorkflow" type="button" disabled>停止执行</button></section>
+      </form>
+      <section class="panel log-panel"><div class="log-head"><div class="section-title"><span>04</span><h2>执行记录</h2></div><span id="status" class="status idle">等待配置</span></div><div id="summary" class="summary">尚未生成任务。</div><ol id="logs" aria-live="polite"></ol></section>
+      <section class="submit-lock"><div><b>最终提交已锁定</b><p>执行器仅生成并校验广告预览。请在创量页面逐项核对预览后，由操作人手动点击“提交审核”。</p></div><button disabled>提交审核（人工操作）</button></section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
